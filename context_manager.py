@@ -70,16 +70,12 @@ class ContextManager( object ):
         # Roll back any remaining savepoints
         if self.savepoints:
 
-            mlog.ctx( self ).debug(
+            logging.warning(
                 "There were %d uncommitted savepoints for %s at __del__ time, rolling back",
-                len( self.savepoints ), self.account.name )
+                len( self.savepoints ), self )
 
             for sp in self.savepoints[::-1]:
                 self.rollbackSavepoint( sp )
-
-
-    def __str__( self ):
-        return "%s (%s)" % (self.__class__.__name__, self.account.name)
 
 
     # Returns the context for the current thread
@@ -193,14 +189,10 @@ class ContextManager( object ):
         # Cache miss
         except KeyError:
 
-            log = mlog.ctx( self )
-            log.debug( "cache miss for %s %s", entityType, pk )
-
             # Attempt fetch if we can, and register on successful fetch
             if fetchFunc:
                 ret = fetchFunc()
                 if ret is not None:
-                    log.debug( "Registered post-fetch %s %s %s", ret.__class__.__name__, ret.entityType, ret.pk )
                     return self.regd( ret )
 
             return None
